@@ -1,0 +1,38 @@
+Single Thread, Event Loop and Blocking Code
+--------------------------------------------------
+
+-------------------
+|Incoming Requests|
+-------------------            
+         |                  Start 
+         |               --------->| Event Loop |<-----
+ ----------------------- |    ------------------------|
+| Code   |    Single    ||    |Handle Event Callbacks|| Trigger Callback
+|        |   JS Thread  ||    ------------------------|
+|        |              |---> "fs"             --------
+|        |              |                      |
+|        |              |                 |Worker Pool| ----> Different Thread(s)!
+ -----------------------             ----------------------    
+                                     |Do the Heavy Lifting|  
+                                     ---------------------- heavy lifting
+
+
+--------------  refs == 0
+|process.exit|<--
+--------------   \
+                  \    The Event Loop 
+                   \
+                    -------------> ---      |Timers|
+                    |                |  -----------------------
+                    |                |  |Execute setTimeout,  |
+|Close Callbacks|   |                |  |setInterval Callbacks|
+--------------------|                |  -----------------------
+Execute all 'close'||                |
+event callbacks    |------------------      |Pending Callbacks|
+-------------------                     ------------------------------
+                                        |    Execute I/O-related     |
+     |Check|                            |callbacks that were deferred|
+------------------------                ------------------------------
+|Execute setImmediate()|
+|    callback          |
+------------------------
