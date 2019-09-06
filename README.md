@@ -1,1 +1,1 @@
-# JS researches
+# Estudo em JavaScript
